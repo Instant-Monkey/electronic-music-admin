@@ -26,6 +26,7 @@ export default class SearchWrapper extends Component {
   handleSearch = (query) => {
     if (query.length > 0) {
       this.setState({ noResult: false }, () => {
+        console.log(`${process.env.REACT_APP_API_URL}/albums/search-spotify/${query}`);
         fetch(`${process.env.REACT_APP_API_URL}/albums/search-spotify/${query}`, {
           method: 'GET',
           headers: new Headers(apiKey()),
