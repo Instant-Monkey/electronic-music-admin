@@ -31,7 +31,7 @@ export default class ManageAlbum extends Component {
     this.setState({ currentId: nextProps.match.params.id }, () => this.updateItself());
   }
   getRelationShips() {
-    fetch(`/albums/related/${this.state.currentId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/albums/related/${this.state.currentId}`, {
       method: 'GET',
       headers: new Headers(apiKey()),
     })
@@ -45,7 +45,7 @@ export default class ManageAlbum extends Component {
       });
   }
   updateItself() {
-    fetch(`/albums/${this.state.currentId}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/albums/${this.state.currentId}`, {
       method: 'GET',
       headers: new Headers(apiKey()),
     })
@@ -71,7 +71,7 @@ export default class ManageAlbum extends Component {
         message,
       },
     };
-    fetch('/albums/add-album-relationship', {
+    fetch(`${process.env.REACT_APP_API_URL}/albums/add-album-relationship`, {
       method: 'POST',
       headers: new Headers(apiKey()),
       body: JSON.stringify(property),
