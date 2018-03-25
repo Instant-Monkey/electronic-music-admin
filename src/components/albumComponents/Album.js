@@ -34,7 +34,7 @@ export default class Album extends Component {
   }
   updateItself(props) {
     // every album has to search for itself in spotify to be displayed
-    fetch(`/albums/get-spotify/${props.id}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/albums/get-spotify/${props.id}`, {
       method: 'GET',
       headers: new Headers(apiKey()),
     })
@@ -45,11 +45,14 @@ export default class Album extends Component {
       }));
     // if the album is displayed in the context of search, it searchs for itself in the databse
     if (props.hasBeenSearched) {
-      return fetch(`/albums/${props.id}`, {
+      console.log('searching in databse');
+      return fetch(`${process.env.REACT_APP_API_URL}/albums/${props.id}`, {
         method: 'GET',
         headers: new Headers(apiKey()),
       })
-        .then(res => res.json())
+        .then(res => {
+          console.log(res);
+          return res.json();})
         .then(dbAlbumInfo => this.setState({
           existInDatabase: !_.isEmpty(dbAlbumInfo),
         }));
@@ -70,7 +73,7 @@ export default class Album extends Component {
         reltype: 'AUTHORED',
       },
     };
-    fetch('/add-relationship', {
+    fetch(`${process.env.REACT_APP_API_URL}/add-relationship`, {
       method: 'POST',
       headers: new Headers(apiKey()),
       body: JSON.stringify(property),
@@ -78,7 +81,7 @@ export default class Album extends Component {
       .then(addedRelation => console.log(addedRelation));
   }
   addAlbumToNeo4J() {
-    fetch('/albums/add-album', {
+    fetch(`${process.env.REACT_APP_API_URL}/albums/add-album`, {
       method: 'POST',
       headers: new Headers(apiKey()),
       body: JSON.stringify(this.state.album),
@@ -89,7 +92,7 @@ export default class Album extends Component {
           existInDatabase: !_.isEmpty(insertedAlbum),
         });
         // we check if the artist exist in the database
-        fetch(`/artists/${this.state.album.artists[0].id}`, {
+        fetch(`${process.env.REACT_APP_API_URL}/artists/${this.state.album.artists[0].id}`, {
           method: 'GET',
           headers: new Headers(apiKey()),
         })
@@ -107,10 +110,10 @@ export default class Album extends Component {
   }
 
   addArtistToNeo4J(callback) {
-    fetch(`/artists/get-spotify/${this.state.album.artists[0].id}`)
+    fetch(`${process.env.REACT_APP_API_URL}/artists/get-spotify/${this.state.album.artists[0].id}`)
       .then(res => res.json())
       .then((spotifyArtist) => {
-        fetch('/artists/add-artist', {
+        fetch(`${process.env.REACT_APP_API_URL}/artists/add-artist`, {
           method: 'POST',
           headers: new Headers(apiKey()),
           body: JSON.stringify(spotifyArtist),
