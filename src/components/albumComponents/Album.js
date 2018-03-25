@@ -45,14 +45,11 @@ export default class Album extends Component {
       }));
     // if the album is displayed in the context of search, it searchs for itself in the databse
     if (props.hasBeenSearched) {
-      console.log('searching in databse');
       return fetch(`${process.env.REACT_APP_API_URL}/albums/${props.id}`, {
         method: 'GET',
         headers: new Headers(apiKey()),
       })
-        .then(res => {
-          console.log(res);
-          return res.json();})
+        .then(res => res.json())
         .then(dbAlbumInfo => this.setState({
           existInDatabase: !_.isEmpty(dbAlbumInfo),
         }));
