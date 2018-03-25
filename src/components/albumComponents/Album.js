@@ -95,6 +95,7 @@ export default class Album extends Component {
         })
           .then(res => res.json())
           .then((artistRes) => {
+            console.log('ça a passé la recherche dartiste en db');
             if (_.isEmpty(artistRes)) {
               // if not, we add him to the db
               this.addArtistToNeo4J(() => this.addArtistAlbumRelationship());
