@@ -107,20 +107,19 @@ export default class Album extends Component {
   }
 
   addArtistToNeo4J(callback) {
-    console.log('artist', this.state.album.artists[0].id);
-    fetch(`${process.env.REACT_APP_API_URL}/artists/get-spotify/${this.state.album.artists[0].id}`)
+    fetch(`${process.env.REACT_APP_API_URL}/artists/get-spotify/${this.state.album.artists[0].id}`, {
+      method: 'GET',
+      headers: new Headers(apiKey()),
+    })
       .then(res => res.json())
       .then((spotifyArtist) => {
-        console.log('spotify artist', spotifyArtist);
         fetch(`${process.env.REACT_APP_API_URL}/artists/add-artist`, {
           method: 'POST',
           headers: new Headers(apiKey()),
           body: JSON.stringify(spotifyArtist),
-        }).then(res => {
-          console.log(res);
-          return res.json();})
+        }).then(res => res.json())
           .then((insertedArtist) => {
-            console.log('added :', insertedArtist);
+            console.log(' Artist added :', insertedArtist);
             if (_.isFunction(callback)) {
               callback();
             }
