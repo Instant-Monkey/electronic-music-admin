@@ -31,18 +31,45 @@ export default class ManageAlbum extends Component {
     this.setState({ currentId: nextProps.match.params.id }, () => this.updateItself());
   }
   getRelationShips() {
-    fetch(`${process.env.REACT_APP_API_URL}/albums/related/${this.state.currentId}`, {
-      method: 'GET',
-      headers: new Headers(apiKey()),
-    })
-      .then(res => res.json())
-      .then((relationships) => {
-        const onlyFields = relationships.map(relation => relation._fields[0]);
-        console.log(onlyFields);
-        this.setState({
-          relations: onlyFields,
-        });
+    const related = new Promise((resolve, reject) => {
+      fetch(`${process.env.REACT_APP_API_URL}/albums/related/${this.state.currentId}`, {
+        method: 'GET',
+        headers: new Headers(apiKey()),
+      })
+        .then(res => res.json())
+        .then((results) => {
+          const onlyFields = results.map(relation => relation._fields[0]);
+          resolve(onlyFields);
+        })
+        .catch(err => reject(err));
+    });
+
+    const relationships = new Promise((resolve, reject) => {
+      fetch(`${process.env.REACT_APP_API_URL}/albums/relationships/${this.state.currentId}`, {
+        method: 'GET',
+        headers: new Headers(apiKey()),
+      })
+        .then(res => res.json())
+        .then((results) => {
+          const messageArray = results.map(relationship => relationship._fields[0]);
+          resolve(messageArray);
+        })
+        .catch(err => reject(err));
+    });
+
+    Promise.all([related, relationships]).then((values) => {
+      const relatedNodes = values[0];
+      const relationshipsToNodes = values[1];
+      const fullRelationObject = relatedNodes.map((rel) => {
+        // we find the relationship linked to the related node
+        const relationship = relationshipsToNodes.find(relN => relN.end.low === rel.identity.low);
+        // we merge the two object
+        return Object.assign({ relType: relationship.type, relProp: relationship.properties }, rel);
       });
+      this.setState({
+        relations: fullRelationObject,
+      });
+    });
   }
   updateItself() {
     fetch(`${process.env.REACT_APP_API_URL}/albums/${this.state.currentId}`, {
@@ -83,7 +110,6 @@ export default class ManageAlbum extends Component {
   }
   renderRelations() {
     if (this.state.relations.length > 0) {
-      console.log(this.state.relations);
       return this.state.relations.map(relation =>
         (<Relation
           key={`${relation.identity.low}`}

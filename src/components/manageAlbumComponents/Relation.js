@@ -11,12 +11,11 @@ export default class Relation extends Component {
     };
   }
   render() {
-    console.log(this.props.relation);
     return (
       <div className="relation-container">
         <Album
           id={this.props.relation.properties._id}
-          overlayTitle={ ""/*this.props.relation[0].properties.message*/}
+          overlayTitle={this.props.relation.relProp.message}
           width="100%"
           hasBeenSearched
 
@@ -27,5 +26,5 @@ export default class Relation extends Component {
 }
 
 Relation.propTypes = {
-  relation: PropTypes.array.isRequired,
+  relation: PropTypes.object.isRequired,
 };
