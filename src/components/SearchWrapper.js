@@ -17,35 +17,60 @@ export default class SearchWrapper extends Component {
       albumsResults: [],
       spotifyChecked: false,
       noResult: false,
+      searchIdChecked: false,
     };
     this.handleSearch = this.handleSearch.bind(this);
     this.renderAlbumResults = this.renderAlbumResults.bind(this);
     this.updateSpotifyChecked = this.updateSpotifyChecked.bind(this);
+    this.updateSearchIdChecked = this.updateSearchIdChecked.bind(this);
   }
-
   handleSearch = (query) => {
     if (query.length > 0) {
-      this.setState({ noResult: false }, () => {
-        fetch(`${process.env.REACT_APP_API_URL}/albums/search-spotify/${query}`, {
-          method: 'GET',
-          headers: new Headers(apiKey()),
-        })
-          .then(res => res.json())
-          .then((found) => {
-            if (found.items.length > 0) {
-              return this.setState({ albumsResults: found.items });
-            }
-            return this.setState({
-              noResult: true,
-              albumsResults: [],
+      if (this.state.searchIdChecked) {
+        this.setState({ noResult: false }, () => {
+          fetch(`${process.env.REACT_APP_API_URL}/albums/get-spotify/${query}`, {
+            method: 'GET',
+            headers: new Headers(apiKey()),
+          })
+            .then(res => res.json())
+            .then((album) => {
+              if (album.id === query) {
+                return this.setState({ albumsResults: [album] });
+              }
+              return this.setState({
+                noResult: true,
+                albumsResults: [],
+              });
             });
-          });
-      });
+        });
+      } else {
+        this.setState({ noResult: false }, () => {
+          fetch(`${process.env.REACT_APP_API_URL}/albums/search-spotify/${query}`, {
+            method: 'GET',
+            headers: new Headers(apiKey()),
+          })
+            .then(res => res.json())
+            .then((found) => {
+              if (found.items.length > 0) {
+                return this.setState({ albumsResults: found.items });
+              }
+              return this.setState({
+                noResult: true,
+                albumsResults: [],
+              });
+            });
+        });
+      }
     }
   }
   updateSpotifyChecked() {
     this.setState({
       spotifyChecked: !this.state.spotifyChecked,
+    });
+  }
+  updateSearchIdChecked() {
+    this.setState({
+      searchIdChecked: !this.state.searchIdChecked,
     });
   }
   renderAlbumResults = () => {
@@ -58,6 +83,7 @@ export default class SearchWrapper extends Component {
           spotifyChecked={this.state.spotifyChecked}
           isUnderManagement={this.props.isUnderManagement}
           addRelationship={this.props.addRelationship}
+
         />);
     }
     if (this.state.noResult) {
@@ -72,6 +98,8 @@ export default class SearchWrapper extends Component {
           handleSearch={this.handleSearch}
           spotifyChecked={this.state.spotifyChecked}
           updateSpotifyChecked={this.updateSpotifyChecked}
+          searchIdChecked={this.state.searchIdChecked}
+          updateSearchIdChecked={this.updateSearchIdChecked}
         />
         <div style={style}>
           {this.renderAlbumResults()}

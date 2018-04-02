@@ -57,6 +57,12 @@ export default class SearchContainer extends Component {
             checked={this.props.spotifyChecked}
             onCheck={this.props.updateSpotifyChecked}
           />
+          <Checkbox
+            label="Search for Id"
+            style={style.checkbox}
+            checked={this.props.searchIdChecked}
+            onCheck={this.props.updateSearchIdChecked}
+          />
         </Paper>
       </div>
     );
