@@ -4,6 +4,9 @@ import _ from 'lodash';
 
 import { Card, CardActions, CardMedia, CardTitle, CardText } from 'material-ui/Card';
 import CircularProgress from 'material-ui/CircularProgress';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
+import TextField from 'material-ui/TextField';
 
 import AlbumActions from './AlbumActions';
 import apiKey from '../../apiAuthentificate';
@@ -15,6 +18,8 @@ export default class Album extends Component {
       album: {},
       existInDatabase: false,
       loading: true,
+      messRelationDialogOpen: false,
+      messaRelation: props.overlayTitle,
       style: {
         width: `calc(${this.props.width} - 20px)`,
         flex: '0 0 auto',
@@ -25,6 +30,10 @@ export default class Album extends Component {
     this.addArtistToNeo4J = this.addArtistToNeo4J.bind(this);
     this.addArtistAlbumRelationship = this.addArtistAlbumRelationship.bind(this);
     this.updateItself = this.updateItself.bind(this);
+    this.handleTextChange = this.handleTextChange.bind(this);
+    this.handleMessDialogOpen = this.handleMessDialogOpen.bind(this);
+    this.handleMessDialogClose = this.handleMessDialogClose.bind(this);
+    this.renderOverlay = this.renderOverlay.bind(this);
   }
   componentDidMount() {
     this.updateItself(this.props);
@@ -126,6 +135,63 @@ export default class Album extends Component {
           });
       });
   }
+  handleTextChange = (event) => {
+    this.setState({
+      messaRelation: event.target.value,
+    });
+  };
+  handleMessDialogOpen = () => {
+    this.setState({ messRelationDialogOpen: true });
+  };
+
+  handleMessDialogClose = () => {
+    this.setState({ messRelationDialogOpen: false });
+  };
+
+  renderOverlay() {
+    if (this.props.overlayTitle.length > 0) {
+      const actions = [
+        <FlatButton
+          label="Cancel"
+          primary
+          onClick={this.handleMessDialogClose}
+        />,
+        <FlatButton
+          label="Submit"
+          primary
+          keyboardFocused
+          onClick={() => {
+            this.props.editRelationshipMessage(this.props.id, this.state.messaRelation);
+            return this.handleMessDialogClose();
+          }}
+        />,
+      ];
+      return (
+        <div>
+          <CardText style={{ color: '#fff', cursor: 'pointer' }} onClick={this.handleMessDialogOpen}>
+            {this.props.overlayTitle}
+          </CardText>
+          <Dialog
+            title="Editez le message de la relation"
+            actions={actions}
+            modal={false}
+            open={this.state.messRelationDialogOpen}
+            onRequestClose={this.handleMessDialogClose}
+          >
+            <TextField
+              style={{
+                margin: '0px 20px',
+              }}
+              hintText="Message"
+              value={this.state.messaRelation}
+              onChange={this.handleTextChange}
+            />
+          </Dialog>
+        </div>
+      );
+    }
+    return null;
+  }
   render() {
     if (!this.state.loading) {
       // if the spotify checkbox is checked,
@@ -134,9 +200,7 @@ export default class Album extends Component {
         return (
           <Card style={this.state.style}>
             <CardMedia
-              overlay={
-                <CardText>{this.props.overlayTitle}</CardText>
-              }
+              overlay={this.renderOverlay()}
             >
               <img src={this.state.album.images[0].url} alt="" />
             </CardMedia>

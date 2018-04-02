@@ -64,7 +64,7 @@ export default class ManageAlbum extends Component {
         // we find the relationship linked to the related node
         const relationship = relationshipsToNodes.find(relN => relN.end.low === rel.identity.low);
         // we merge the two object
-        return Object.assign({ relType: relationship.type, relProp: relationship.properties }, rel);
+        return Object.assign({ relType: relationship.type, relProp: relationship.properties, originId: this.state.currentId }, rel);
       });
       this.setState({
         relations: fullRelationObject,
